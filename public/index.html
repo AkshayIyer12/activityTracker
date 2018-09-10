@@ -1,0 +1,44 @@
+<html>
+<body>
+  <img id="img1" src="/images/icon1.png"/>
+  <br \>
+  <img id="img2" src="/images/icon2.png"/>
+  <br \>
+  <img id="img3" src="/images/icon3.jpg"/>
+  <br \>
+  <img id="img4" src="/images/icon4.jpg"/>
+  <br \>
+  <img id="img5" src="/images/icon5.png"/>
+  <br \>
+  <script>
+    const setStorage = (k, v) => window.localStorage.setItem(k , v)
+    const getStorage = k => window.localStorage.getItem(k)
+    const id = id => document.getElementById(id)
+    const arr = ['img1', 'img2', 'img3', 'img4', 'img5']
+    arr.forEach(item => {
+      id(item).addEventListener('click', e => {
+        const k = e.target.id
+        console.log('click', e.target.id)
+        let x = JSON.parse(getStorage(k))
+        if (x === undefined || x === null) {
+          setStorage(k, JSON.stringify({ click: 0, hover: 0 }))
+        } else {
+          setStorage(k, JSON.stringify({ click: x.click + 1, hover: x.hover }))
+        }
+      })
+      id(item).addEventListener('mouseover', e => {
+        console.log('hover', e.target.id)
+        let k = e.target.id
+        let x = JSON.parse(getStorage(k))
+        console.log(x)
+        if (x === undefined || x === null) {
+          setStorage(k, JSON.stringify({ hover: 0, click: 0 }))
+        } else {
+          setStorage(k, JSON.stringify({ hover: x.hover + 1, click: x.click }))
+        }
+      })
+
+    })
+</script>
+</body>
+</html>
