@@ -1,43 +1,62 @@
 <html>
 <body>
-  <img id="img1" src="/images/icon1.png"/>
+<img id="img1" src="/images/icon1.png" width="60" height="60" />
   <br \>
-  <img id="img2" src="/images/icon2.png"/>
+<img id="img2" src="/images/icon2.png" width="60" height="60" />
   <br \>
-  <img id="img3" src="/images/icon3.jpg"/>
+<img id="img3" src="/images/icon3.jpg" width="60" height="60" />
   <br \>
-  <img id="img4" src="/images/icon4.jpg"/>
+<img id="img4" src="/images/icon4.jpg" width="60" height="60" />
   <br \>
-  <img id="img5" src="/images/icon5.png"/>
+<img id="img5" src="/images/icon5.png" width="60" height="60" />
   <br \>
   <script>
-    const setStorage = (k, v) => window.localStorage.setItem(k , v)
-    const getStorage = k => window.localStorage.getItem(k)
+    let key = window.location.pathname.split('/')[1]
+    let counterObj = { click: 0, hover: 0 }
+    const setStorage = (k, v) => window.localStorage.setItem(k , JSON.stringify(v))
+    const getStorage = k => JSON.parse(window.localStorage.getItem(k))
+    let value = {
+      img1: counterObj,
+      img2: counterObj,
+      img3: counterObj,
+      img4: counterObj,
+      img5: counterObj
+    }
+    if (getStorage(key) === null) {
+      postData(`/${key}`, {[key]: value}, 'POST')
+        .then(data => {
+          value = data.success.val
+          value.id = data.success.id
+          setStorage(key, value)
+        })
+        .catch(error => console.error(error));
+    }
+
+    function postData(url = ``, data = {}, method) {
+      return fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(data),
+      })
+      .then(response => response.json())
+    }
     const id = id => document.getElementById(id)
     const arr = ['img1', 'img2', 'img3', 'img4', 'img5']
+    function eventHandler (e) {
+      const k = e.target.id
+      let eventType = e.type === 'click' ? 'click' : 'hover'
+      let x = getStorage(key)
+      x[k][eventType] += 1
+      console.log(x[k], x.id, k)
+      postData(`/${key}`, {value: x[k], objectId: x.id, key: k}, 'PUT')
+      .then(data => setStorage(key, x))
+      .catch(err => console.error('Bail out'))
+    }
     arr.forEach(item => {
-      id(item).addEventListener('click', e => {
-        const k = e.target.id
-        console.log('click', e.target.id)
-        let x = JSON.parse(getStorage(k))
-        if (x === undefined || x === null) {
-          setStorage(k, JSON.stringify({ click: 0, hover: 0 }))
-        } else {
-          setStorage(k, JSON.stringify({ click: x.click + 1, hover: x.hover }))
-        }
-      })
-      id(item).addEventListener('mouseover', e => {
-        console.log('hover', e.target.id)
-        let k = e.target.id
-        let x = JSON.parse(getStorage(k))
-        console.log(x)
-        if (x === undefined || x === null) {
-          setStorage(k, JSON.stringify({ hover: 0, click: 0 }))
-        } else {
-          setStorage(k, JSON.stringify({ hover: x.hover + 1, click: x.click }))
-        }
-      })
-
+      id(item).addEventListener('click', eventHandler)
+      id(item).addEventListener('mouseover', eventHandler)
     })
 </script>
 </body>
